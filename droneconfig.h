@@ -2,6 +2,7 @@
 #include<stdint.h>
 #include<string.h>
 #include<stdlib.h>
+#include<conio.h>
 
 struct dronebank{
     char name[25];
@@ -32,8 +33,6 @@ int input(int number){
 
 void save(int i){
 }
-
-void display(int number);
 
 int memorycontrol(int capacity){
     droneArray=(struct dronebank*)malloc(capacity*sizeof(struct dronebank));
@@ -72,6 +71,14 @@ int registe(int command,int count){   //command==2ÎªµÇÂ¼ command==1ÊÇ×¢²á
     }
 }
 
+void display(int number){
+    printf("%s\n",droneArray[number].name);
+    printf("%s\n",droneArray[number].password);
+    printf("%s\n",droneArray[number].phonenum);
+    printf("%s\n",droneArray[number].dronetype);
+    printf("%f\n",droneArray[number].weight);
+}
+
 int login(char *name,char * password,int count){
     for(int i=0;i<count;i++){
         if(droneArray[i].name==*name && droneArray[i].password==*password){
@@ -83,10 +90,24 @@ int login(char *name,char * password,int count){
     return 0;
 }
 
-void display(int number){
-    printf("%s\n",droneArray[number].name);
-    printf("%s\n",droneArray[number].password);
-    printf("%s\n",droneArray[number].phonenum);
-    printf("%s\n",droneArray[number].dronetype);
-    printf("%f\n",droneArray[number].weight);
+void list(){
+    for(int i=0;i<count;++i){
+        printf("%s\n",droneArray[i].name);
+        printf("%s\n",droneArray[i].dronetype);
+    }
+}
+
+void menu(){
+    printf("Select the function you want to use\n");
+    printf("1.Register\n");
+    printf("2.Login\n");
+    printf("3.List\n");
+    printf("4.Exit\n");
+    int c=_getch()-'0';
+    switch(c){
+        case 1:
+        case 2:registe(c,count);break;
+        case 3:list();break;
+        case 4:exit(0);
+    }
 }
