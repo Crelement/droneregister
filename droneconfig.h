@@ -97,6 +97,15 @@ void list(){
     }
 }
 
+int verify(char *name,char *password){
+    for(int i=0;i<count;++i){
+        if(!strcmp(droneArray[i].name,name)&&!strcmp(droneArray[i].password,password)){
+            return 1;
+        }
+    }
+    return 0;
+}
+
 void menu(){
     printf("Select the function you want to use\n");
     printf("1.Register\n");
