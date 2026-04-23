@@ -7,26 +7,26 @@
 struct dronebank{
     char name[25];
     char password[20];
-    char phonenum[11];
+    char phonenum[12];
     char dronetype[20];
     float weight;
 };
 
 struct dronebank bufferzone;
-struct dronebank *droneArray;   // 声明一个指针，尚未分配空间
-int capacity=10;              // 记录当前分配的最大元素个�?
-int count=0;                  //count是总在册人�?,number是编�?
+struct dronebank *droneArray;
+int capacity=10;
+int count=0;
 float min_weight=0;
 
 void input(int number){
     printf("please enter your name\n");
-    scanf("%s",droneArray[number].name);
+    scanf("%24s",droneArray[number].name);
     printf("enter your password\n");
-    scanf("%s",droneArray[number].password);
+    scanf("%19s",droneArray[number].password);
     printf("enter your phonenumber\n");
-    scanf("%s",droneArray[number].phonenum);
+    scanf("%11s",droneArray[number].phonenum);
     printf("your dronetype\n");
-    scanf("%s",droneArray[number].dronetype);
+    scanf("%19s",droneArray[number].dronetype);
     printf("the weight of your drone\n");
     scanf("%f",&droneArray[number].weight);
 }
@@ -53,6 +53,7 @@ void load(){
 			droneArray[i].dronetype,
 			&droneArray[i].weight);
 	}
+    capacity=count<capacity?capacity:count;
 	fclose(fp);
 	printf("file load success\n");
 	system("pause");
