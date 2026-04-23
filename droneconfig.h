@@ -13,10 +13,9 @@ struct dronebank{
 };
 
 struct dronebank bufferzone;
-
-struct dronebank *droneArray;   // 声明一个指针，尚未分配空间
-int capacity=10;              // 记录当前分配的最大元素个数
-int count=0;                  //count是总在册人数,number是编号
+struct dronebank *droneArray;   // 澹版槑涓�涓寚閽堬紝灏氭湭鍒嗛厤绌洪棿
+int capacity=10;              // 璁板綍褰撳墠鍒嗛厤鐨勬渶澶у厓绱犱釜鏁?
+int count=0;                  //count鏄�诲湪鍐屼汉鏁?,number鏄紪鍙?
 float min_weight=0;
 
 uint8_t input(int number){
@@ -33,7 +32,34 @@ uint8_t input(int number){
     return 1;
 }
 
+
+void load(){
+    FILE *fp;
+    fp=fopen("info.txt","r");
+    /*if(fp==NULL){
+        printf("file open failed\n");
+        return;
+    }*/
+        fscanf(fp,"               %d %(struct dronebank *)\n",&count,&droneArray);
+    for(int i=0;i<count;i++){
+        fscanf(fp,"%s %s %s %s %f\n",droneArray[i].name,droneArray[i].password,droneArray[i].phonenum,droneArray[i].dronetype,&droneArray[i].weight);
+    }
+    printf("file load success\n");
+    system("pause");
+    system("cls");
+    fclose(fp);
+}
 void save(){
+    FILE *fp;
+    fp=fopen("info.txt","w");
+    if(fp==NULL){
+        printf("file open failed\n");
+        return;
+    }
+    for(int i=0;i<count;i++){
+        fprintf(fp,"%s %s %s %s %f %d %d\n",droneArray[i].name,droneArray[i].password,droneArray[i].phonenum,droneArray[i].dronetype,droneArray[i].weight,count,&(droneArray[1].name));
+    }
+    fclose(fp);
 }
 
 /*int memorycontrol(){
@@ -53,21 +79,30 @@ int memoryexpand(){
     return 1;
 }
 
-float sort(int number,float min_weight){
-    if(droneArray[number].weight<=min_weight){
+float sort(int number){
+    for(int i=0;i<count;i++){
+
+
+
+    if(droneArray[number].weight<=droneArray[i+1].weight  && droneArray[number].weight>=droneArray[i].weight){
         min_weight=droneArray[number].weight;
         memcpy(&bufferzone.weight,&droneArray[number-1].weight,sizeof(struct dronebank));
         memcpy(&droneArray[number-1].weight,&droneArray[number].weight,sizeof(struct dronebank));
         memcpy(&droneArray[number].weight,&bufferzone.weight,sizeof(struct dronebank));
     }
-    return min_weight;
+    
+    }
+    return droneArray[number].weight;
 }
 
-uint8_t registe(){   //command==2为登录 command==1是注册
+uint8_t registe(){   //command==2涓虹櫥褰? command==1鏄敞鍐?
    count++;
    memoryexpand();
    input(count-1);
-   min_weight=sort(count-1,min_weight);  
+  // min_weight=sort(count-1);  
+   system("cls");
+   printf("register success\n");
+   system("pause");
     return 0;
 }
 
@@ -134,5 +169,3 @@ void menu(){
         exit(0);
     }
 }
-
-
