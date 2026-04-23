@@ -14,11 +14,11 @@ struct dronebank{
 
 struct dronebank bufferzone;
 struct dronebank *droneArray;   // 声明一个指针，尚未分配空间
-int capacity=10;              // 记录当前分配的最大元素个�?
-int count=0;                  //count是总在册人�?,number是编�?
+int capacity=10;              // 记录当前分配的最大元素个�?
+int count=0;                  //count是总在册人�?,number是编�?
 float min_weight=0;
 
-uint8_t input(int number){
+void input(int number){
     printf("please enter your name\n");
     scanf("%s",droneArray[number].name);
     printf("enter your password\n");
@@ -29,37 +29,52 @@ uint8_t input(int number){
     scanf("%s",droneArray[number].dronetype);
     printf("the weight of your drone\n");
     scanf("%f",&droneArray[number].weight);
-    return 1;
 }
-
 
 void load(){
-    FILE *fp;
-    fp=fopen("info.txt","r");
-    /*if(fp==NULL){
-        printf("file open failed\n");
-        return;
-    }*/
-        fscanf(fp,"               %d %(struct dronebank *)\n",&count,&droneArray);
-    for(int i=0;i<count;i++){
-        fscanf(fp,"%s %s %s %s %f\n",droneArray[i].name,droneArray[i].password,droneArray[i].phonenum,droneArray[i].dronetype,&droneArray[i].weight);
-    }
-    printf("file load success\n");
-    system("pause");
-    system("cls");
-    fclose(fp);
+	FILE*fp=fopen("info.txt","r");
+	if(fp==NULL){
+		count=0;
+		droneArray=NULL;
+		return;
+	}
+	fscanf(fp,"%d",&count);
+	droneArray=(struct dronebank*)malloc(count*sizeof(struct dronebank));
+	if(droneArray==NULL){
+		printf("Memory allocation failed!\n");
+		fclose(fp);
+		exit(1);
+	}
+	for(int i=0;i<count;i++){
+		fscanf(fp,"%s %s %s %s %f",
+			droneArray[i].name,
+			droneArray[i].password,
+			droneArray[i].phonenum,
+			droneArray[i].dronetype,
+			&droneArray[i].weight);
+	}
+	fclose(fp);
+	printf("file load success\n");
+	system("pause");
+	system("cls");
 }
+
 void save(){
-    FILE *fp;
-    fp=fopen("info.txt","w");
-    if(fp==NULL){
-        printf("file open failed\n");
-        return;
-    }
-    for(int i=0;i<count;i++){
-        fprintf(fp,"%s %s %s %s %f %d %d\n",droneArray[i].name,droneArray[i].password,droneArray[i].phonenum,droneArray[i].dronetype,droneArray[i].weight,count,&(droneArray[1].name));
-    }
-    fclose(fp);
+	FILE*fp=fopen("info.txt","w");
+	if(fp==NULL){
+		printf("file open failed\n");
+		return;
+	}
+	fprintf(fp,"%d\n",count);
+	for(int i=0;i<count;i++){
+		fprintf(fp,"%s %s %s %s %f\n",
+			droneArray[i].name,
+			droneArray[i].password,
+			droneArray[i].phonenum,
+			droneArray[i].dronetype,
+			droneArray[i].weight);
+	}
+	fclose(fp);
 }
 
 /*int memorycontrol(){
@@ -81,21 +96,17 @@ int memoryexpand(){
 
 float sort(int number){
     for(int i=0;i<count;i++){
-
-
-
-    if(droneArray[number].weight<=droneArray[i+1].weight  && droneArray[number].weight>=droneArray[i].weight){
-        min_weight=droneArray[number].weight;
-        memcpy(&bufferzone.weight,&droneArray[number-1].weight,sizeof(struct dronebank));
-        memcpy(&droneArray[number-1].weight,&droneArray[number].weight,sizeof(struct dronebank));
-        memcpy(&droneArray[number].weight,&bufferzone.weight,sizeof(struct dronebank));
-    }
-    
+        if(droneArray[number].weight<=droneArray[i+1].weight  && droneArray[number].weight>=droneArray[i].weight){
+            min_weight=droneArray[number].weight;
+            memcpy(&bufferzone.weight,&droneArray[number-1].weight,sizeof(struct dronebank));
+            memcpy(&droneArray[number-1].weight,&droneArray[number].weight,sizeof(struct dronebank));
+            memcpy(&droneArray[number].weight,&bufferzone.weight,sizeof(struct dronebank));
+        }
     }
     return droneArray[number].weight;
 }
 
-uint8_t registe(){   //command==2为登�? command==1是注�?
+void registe(){   //command==2为登�? command==1是注�?
    count++;
    memoryexpand();
    input(count-1);
@@ -103,7 +114,6 @@ uint8_t registe(){   //command==2为登�? command==1是注�?
    system("cls");
    printf("register success\n");
    system("pause");
-    return 0;
 }
 
 void display(int number){
@@ -117,16 +127,12 @@ void display(int number){
     }
 }
 
-
-
-
 void list(){
     for(int i=0;i<count;++i){
         printf("%s\n",droneArray[i].name);
         printf("%s\n",droneArray[i].dronetype);
     }
     system("pause");
-
 }
 
 int login(){
@@ -142,14 +148,11 @@ int login(){
             system("pause");
             return 1;
         }
-      
     }
     printf("error user or password\n");
-      system("pause");
+    system("pause");
     return 0;
 }
-
-
 
 void menu(){
     printf("Welcome to drone assignment system\n");
@@ -163,9 +166,9 @@ void menu(){
         case 2:login();break;
         case 3:list();break;
         case 4:
-        save();
-        printf("presented by Cr\n");
-        system("pause");
-        exit(0);
+            save();
+            printf("presented by Cr\n");
+            system("pause");
+            exit(0);
     }
 }
