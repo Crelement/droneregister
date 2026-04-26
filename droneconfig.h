@@ -227,8 +227,8 @@ void list(){
 }
 
 void applydisplay(int number){
-    printf("applydronetype %20s\n",applyArray[number].dronetype);  
-    printf("applytime %20s\n",applyArray[number].applytime);
+    printf("applydronetype %s\n",applyArray[number].dronetype);  
+    printf("applytime %s\n",applyArray[number].applytime);
     if(!applyArray[number].passstatus){
         printf("pass\n");
    }else{
