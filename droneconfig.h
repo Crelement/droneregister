@@ -56,6 +56,7 @@ void load(){
 	}
 	fscanf(fp,"%d",&count);
 	droneArray=(struct dronebank*)malloc(count*sizeof(struct dronebank));
+    applyArray=(struct flyapply*)malloc(count*sizeof(struct flyapply));
 	if(droneArray==NULL){
 		printf("Memory allocation failed!\n");
 		fclose(fp);
@@ -68,7 +69,7 @@ void load(){
 			droneArray[i].phonenum,
 			droneArray[i].dronetype,
 			&droneArray[i].weight,droneArray[i].registertime);
-        fscanf(fp,"%s %s %s %s %s %s %s",
+        fscanf(fp,"%s %s %s %s %s %s %1s",
             applyArray[i].dronetype,
             applyArray[i].applytime,
             applyArray[i].applyaddress,
