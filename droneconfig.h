@@ -227,9 +227,9 @@ void list(){
 }
 
 void applydisplay(int number){
-    printf("%20s\n",applyArray[number].dronetype);  
-    printf("%20s\n",applyArray[number].applytime);
-    if(applyArray[number].passstatus){
+    printf("applydronetype %20s\n",applyArray[number].dronetype);  
+    printf("applytime %20s\n",applyArray[number].applytime);
+    if(!applyArray[number].passstatus){
         printf("pass\n");
    }else{
        printf("Approval in progress\n");
@@ -263,7 +263,10 @@ int login(){
     for(int i=0;i<count;++i){
         if(!strcmp(droneArray[i].name,name)&&!strcmp(droneArray[i].password,password)){
             display(i);
+            printf("-------------------\n");
+            printf("applyhistory\n");
             applydisplay(i);
+            printf("-------------------\n");
             printf("apply for flying press 1\n");
              int c=_getch()-'0';
             switch (c){
