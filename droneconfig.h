@@ -3,20 +3,33 @@
 #include<string.h>
 #include<stdlib.h>
 #include<conio.h>
+#include<windows.h>
 
 struct dronebank{
     char name[25];
     char password[20];
     char phonenum[12];
     char dronetype[20];
-    float weight;
+    char registertime[20];
+    float weight;   
+};
+struct flyapply{
+    char dronetype[20];
+    char applytime[20];
+    char applyaddress[50];
+    char applyreason[100];
+    char logtime[20];
+    char certificate[20];
+     uint8_t passstatus;
 };
 
 struct dronebank bufferzone;
 struct dronebank *droneArray;
+struct flyapply *applyArray;
 int capacity=10;
 int count=0;
 float min_weight=0;
+ SYSTEMTIME st;
 
 void input(int number){
     printf("please enter your name\n");
@@ -29,6 +42,9 @@ void input(int number){
     scanf("%19s",droneArray[number].dronetype);
     printf("the weight of your drone\n");
     scanf("%f",&droneArray[number].weight);
+    GetSystemTime(&st);
+    sprintf(droneArray[number].registertime,"%04d-%02d-%02d %02d:%02d:%02d",
+        st.wYear,st.wMonth,st.wDay,st.wHour,st.wMinute,st.wSecond);
 }
 
 void load(){
@@ -46,14 +62,22 @@ void load(){
 		exit(1);
 	}
 	for(int i=0;i<count;i++){
-		fscanf(fp,"%s %s %s %s %f",
+		fscanf(fp,"%s %s %s %s %f %20s",
 			droneArray[i].name,
 			droneArray[i].password,
 			droneArray[i].phonenum,
 			droneArray[i].dronetype,
-			&droneArray[i].weight);
+			&droneArray[i].weight,droneArray[i].registertime);
+        fscanf(fp,"%s %s %s %s %s %s %s",
+            applyArray[i].dronetype,
+            applyArray[i].applytime,
+            applyArray[i].applyaddress,
+            applyArray[i].applyreason,
+            applyArray[i].logtime,
+            applyArray[i].certificate,
+            &applyArray[i].passstatus);
 	}
-    capacity=count<capacity?capacity:count;
+    capacity=count<=capacity?capacity+6:count;
 	fclose(fp);
 	printf("file load success\n");
 	system("pause");
@@ -68,13 +92,22 @@ void save(){
 	}
 	fprintf(fp,"%d\n",count);
 	for(int i=0;i<count;i++){
-		fprintf(fp,"%s %s %s %s %f\n",
+		fprintf(fp,"%s %s %s %s %f %20s\n",
 			droneArray[i].name,
 			droneArray[i].password,
 			droneArray[i].phonenum,
 			droneArray[i].dronetype,
-			droneArray[i].weight);
+			droneArray[i].weight,droneArray[i].registertime);
+             fprintf(fp,"%s %s %s %s %s %s %s\n",
+            applyArray[i].dronetype,
+            applyArray[i].applytime,
+            applyArray[i].applyaddress,
+            applyArray[i].applyreason,
+            applyArray[i].logtime,
+            applyArray[i].certificate,
+            &applyArray[i].passstatus);
 	}
+   
 	fclose(fp);
 }
 
@@ -95,23 +128,78 @@ int memoryexpand(){
     return 1;
 }
 
-float sort(int number){
-    for(int i=0;i<count;i++){
-        if(droneArray[number].weight<=droneArray[i+1].weight  && droneArray[number].weight>=droneArray[i].weight){
-            min_weight=droneArray[number].weight;
-            memcpy(&bufferzone.weight,&droneArray[number-1].weight,sizeof(struct dronebank));
+int memoryflyapplyexpand(){
+    applyArray=(struct flyapply *)realloc(applyArray,capacity*sizeof(struct flyapply));
+    if(count>=capacity){
+        capacity+=6;
+        applyArray=(struct flyapply*)realloc(applyArray,capacity*sizeof(struct flyapply));
+    }
+    if(applyArray==NULL){
+        return 0;
+    }
+    return 1;
+
+}
+
+float sort(int number){   
+    for(int i=0;i<count-1;i++){
+        if(droneArray[number] .weight<=droneArray[i+1].weight  && droneArray[number].weight>=droneArray[i].weight){
+           // min_weight=droneArray[number].weight;
+            bufferzone=droneArray[number];
+            int t=i;
+            while(t+2<count){ 
+                droneArray[i+2]=droneArray[i+1];
+                t++;
+            }
+            droneArray[i+1]=bufferzone;
+            break;
+            /*memcpy(&bufferzone.weight,&droneArray[number-1].weight,sizeof(struct dronebank));
             memcpy(&droneArray[number-1].weight,&droneArray[number].weight,sizeof(struct dronebank));
-            memcpy(&droneArray[number].weight,&bufferzone.weight,sizeof(struct dronebank));
+            memcpy(&droneArray[number].weight,&bufferzone.weight,sizeof(struct dronebank));*/
         }
     }
     return droneArray[number].weight;
 }
 
-void registe(){   //command==2‰∏∫ÁôªÔøΩ? command==1ÊòØÊ≥®ÔøΩ?
+void insert_element(int number) {
+    bufferzone = droneArray[number];  // ‘›¥Ê¥˝≤Â»Î‘™Àÿ
+    int pos = 0;
+
+    // 1. ’“µΩ≤Â»ÎŒª÷√
+    for (pos = 0; pos < count; pos++) {
+        if (bufferzone.weight <= droneArray[pos].weight)
+            break;
+    }
+    // »Áπ˚ pos == count£¨Àµ√˜”¶≤Â»ÎµΩƒ©Œ≤
+
+    // 2. “∆∂Ø‘™Àÿ£®◊¢“‚…æ≥˝‘≠Œª÷√ ±µƒœ¬±Íµ˜’˚£©
+    if (pos < number) {
+        // ≤Â»Îµ„‘⁄‘≠Œª÷√÷Æ«∞ °˙ Ω´ [pos, number-1] ∫Û“∆“ªŒª
+        for (int i = number; i > pos; i--) {
+            droneArray[i] = droneArray[i-1];
+        }
+    } /*else if (pos > number) {
+        // ≤Â»Îµ„‘⁄‘≠Œª÷√÷Æ∫Û °˙ Ω´ [number+1, pos] «∞“∆“ªŒª
+        for (int i = number; i < pos-1; i++) {
+            droneArray[i] = droneArray[i+1];
+        }
+        pos--;  // “ÚŒ™“∆◊ﬂ¡À“ª∏ˆ‘™Àÿ£¨≤Â»ÎŒª÷√◊Û“∆“ª∏Ò
+    } else {
+        // pos == number£¨Œﬁ–Ë“∆∂Ø£¨÷±Ω”∑µªÿ
+        return;
+    }*/
+
+    // 3. ∑≈»Î’˝»∑Œª÷√
+    droneArray[pos] = bufferzone;
+}
+
+void registe(){   //command==2‰∏∫ÁôªÔø?? command==1ÊòØÊ≥®Ôø??
    count++;
    memoryexpand();
+   memoryflyapplyexpand();
    input(count-1);
-  // min_weight=sort(count-1);  
+   //min_weight=sort(count-1); 
+   insert_element(count-1);
    system("cls");
    printf("register success\n");
    system("pause");
@@ -123,6 +211,7 @@ void display(int number){
     printf("phonenumber: %s\n",droneArray[number].phonenum);
     printf("dronetype: %s\n",droneArray[number].dronetype);
     printf("weight: %f\n",droneArray[number].weight);
+    printf("registertime: %s\n",droneArray[number].registertime);
     if(droneArray[number].weight>=250){
         printf("need special certificates CAAC\n");
     }
@@ -136,6 +225,33 @@ void list(){
     system("pause");
 }
 
+void applydisplay(int number){
+    printf("%20s\n",applyArray[number].dronetype);  
+    printf("%20s\n",applyArray[number].applytime);
+    if(applyArray[number].passstatus){
+        printf("pass\n");
+   }else{
+       printf("Approval in progress\n");
+   }
+}
+
+
+void apply(int number){
+    printf("enter the dronetype you want to fly\n");
+     scanf("%19s",applyArray[number].dronetype);
+    printf("enter the apply address\n");
+    scanf("%49s",applyArray[number].applyaddress);
+    printf("enter the apply reson\n");
+    scanf("%99s",applyArray[number].applyreason);
+    printf("enter the applytime\n");
+    scanf("%19s",applyArray[number].applytime);
+    printf("enter you certificate\n");
+    scanf("%19s",applyArray[number].certificate);
+     GetSystemTime(&st);
+     sprintf(droneArray[number].registertime,"%04d-%02d-%02d %02d:%02d:%02d",
+        st.wYear,st.wMonth,st.wDay,st.wHour,st.wMinute,st.wSecond);
+}
+
 int login(){
     char name[25];
     char password[20];
@@ -146,7 +262,20 @@ int login(){
     for(int i=0;i<count;++i){
         if(!strcmp(droneArray[i].name,name)&&!strcmp(droneArray[i].password,password)){
             display(i);
-            system("pause");
+            applydisplay(i);
+            printf("apply for flying press 1\n");
+             int c=_getch()-'0';
+            switch (c){
+                case 1:
+                apply(i);
+                system("cls");
+                printf("please wait for approval\n");
+                system("pause");
+                break;
+                default :break;
+            }
+           
+            //system("pause");
             return 1;
         }
     }
