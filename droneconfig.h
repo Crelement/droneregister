@@ -187,7 +187,7 @@ void insert_element(int number) {
     droneArray[pos] = bufferzone;
 }
 
-void registe(){   //command==2ä¸ºç™»ï¿?? command==1æ˜?æ³?ï¿??
+void registe(){
    count++;
    memoryexpand();
    memoryflyapplyexpand();
