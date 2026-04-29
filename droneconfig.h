@@ -5,15 +5,15 @@
 #include<conio.h>
 #include<windows.h>
 
-struct dronebank{
+typedef struct dronebank{
     char name[25];
     char password[20];
     char phonenum[12];
     char dronetype[20];
     char registertime[20];
     float weight;   
-}bufferzone,*droneArray;
-struct flyapply{
+}Dronebank;
+typedef struct flyapply{
     char dronetype[20];
     char applytime[20];
     char applyaddress[50];
@@ -21,11 +21,11 @@ struct flyapply{
     char logtime[20];
     char certificate[20];
     bool passstatus;
-}*applyArray;
-int capacity=10;
-int count=0;
-float min_weight=0;
+}Flyapply;
+Dronebank*droneArray;
+Flyapply*applyArray;
 SYSTEMTIME st;
+int capacity=1,count;
 
 void input(int number){
     printf("please enter your name\n");
@@ -44,8 +44,9 @@ void input(int number){
 }
 
 void load(){
-	FILE*fp=fopen("info.txt","r");
-	if(fp==NULL){
+	FILE*fp=fopen("dronebank.txt","r");
+	if(!fp){
+        printf("File open failed. Initialize with empty data\n");
 		count=0;
 		droneArray=NULL;
         applyArray=NULL;
@@ -54,7 +55,7 @@ void load(){
 	fscanf(fp,"%d",&count);
 	droneArray=(struct dronebank*)malloc(count*sizeof(struct dronebank));
     applyArray=(struct flyapply*)malloc(count*sizeof(struct flyapply));
-	if(droneArray==NULL||applyArray==NULL){
+	if(!droneArray||!applyArray){
 		printf("Memory allocation failed!\n");
 		fclose(fp);
 		exit(1);
@@ -65,15 +66,8 @@ void load(){
 			droneArray[i].password,
 			droneArray[i].phonenum,
 			droneArray[i].dronetype,
-			&droneArray[i].weight,droneArray[i].registertime);
-        fscanf(fp,"%19s %19s %49s %99s %19s %19s %hhd",
-            applyArray[i].dronetype,
-            applyArray[i].applytime,
-            applyArray[i].applyaddress,
-            applyArray[i].applyreason,
-            applyArray[i].logtime,
-            applyArray[i].certificate,
-            &applyArray[i].passstatus);
+			&droneArray[i].weight,
+            droneArray[i].registertime);
 	}
     capacity=count<=capacity?capacity+6:count;
 	fclose(fp);
@@ -83,9 +77,9 @@ void load(){
 }
 
 void save(){
-	FILE*fp=fopen("info.txt","w");
-	if(fp==NULL){
-		printf("file open failed\n");
+	FILE*fp=fopen("dronebank.txt","w");
+	if(!fp){
+        printf("File open failed. Data not saved!\n");
 		return;
 	}
 	fprintf(fp,"%d\n",count);
@@ -95,104 +89,31 @@ void save(){
 			droneArray[i].password,
 			droneArray[i].phonenum,
 			droneArray[i].dronetype,
-			droneArray[i].weight,droneArray[i].registertime);
-        fprintf(fp,"%s %s %s %s %s %s %hhd\n",
-            applyArray[i].dronetype,
-            applyArray[i].applytime,
-            applyArray[i].applyaddress,
-            applyArray[i].applyreason,
-            applyArray[i].logtime,
-            applyArray[i].certificate,
-            applyArray[i].passstatus);
+			droneArray[i].weight,
+            droneArray[i].registertime);
 	}
 	fclose(fp);
 }
 
-/*int memorycontrol(){
-    droneArray=(struct dronebank*)malloc(capacity*sizeof(struct dronebank));
-    if(droneArray==NULL) return 0;
-}*/
-
 bool memoryexpand(){
-    droneArray=(struct dronebank *)realloc(droneArray,capacity*sizeof(struct dronebank));
-    if(count>=capacity){
-        capacity+=6;
-        droneArray=(struct dronebank*)realloc(droneArray,capacity*sizeof(struct dronebank));
-    }
-    if(droneArray==NULL){
-        return 0;
-    }
-    return 1;
-}
-
-bool memoryflyapplyexpand(){
-    applyArray=(struct flyapply *)realloc(applyArray,capacity*sizeof(struct flyapply));
-    if(count>=capacity){
-        capacity+=6;
-        applyArray=(struct flyapply*)realloc(applyArray,capacity*sizeof(struct flyapply));
-    }
-    if(applyArray==NULL){
-        return 0;
-    }
-    return 1;
-
-}
-
-float sort(int number){   
-    for(int i=0;i<count-1;i++){
-        if(droneArray[number] .weight<=droneArray[i+1].weight  && droneArray[number].weight>=droneArray[i].weight){
-           // min_weight=droneArray[number].weight;
-            bufferzone=droneArray[number];
-            int t=i;
-            while(t+2<count){ 
-                droneArray[i+2]=droneArray[i+1];
-                t++;
-            }
-            droneArray[i+1]=bufferzone;
-            break;
-            /*memcpy(&bufferzone.weight,&droneArray[number-1].weight,sizeof(struct dronebank));
-            memcpy(&droneArray[number-1].weight,&droneArray[number].weight,sizeof(struct dronebank));
-            memcpy(&droneArray[number].weight,&bufferzone.weight,sizeof(struct dronebank));*/
+    if(count>capacity){
+        capacity*=2;
+        Dronebank*temp=(Dronebank*)realloc(droneArray,capacity*sizeof(Dronebank));
+        if(!temp){
+            printf("Memory allocation failed!\n");
+            return false;
         }
+        droneArray=temp;
     }
-    return droneArray[number].weight;
-}
-
-void insert_element(int number) {
-    bufferzone = droneArray[number];  // 暂存待插入元素
-    int pos = 0;
-    // 1. 找到插入位置
-    for (pos = 0; pos < count; pos++) {
-        if (bufferzone.weight <= droneArray[pos].weight)
-            break;
-    }
-    // 如果 pos == count，说明应插入到末尾
-    // 2. 移动元素（注意删除原位置时的下标调整）
-    if (pos < number) {
-        // 插入点在原位置之前 → 将 [pos, number-1] 后移一位
-        for (int i = number; i > pos; i--) {
-            droneArray[i] = droneArray[i-1];
-        }
-    } /*else if (pos > number) {
-        // 插入点在原位置之后 → 将 [number+1, pos] 前移一位
-        for (int i = number; i < pos-1; i++) {
-            droneArray[i] = droneArray[i+1];
-        }
-        pos--;  // 因为移走了一个元素，插入位置左移一格
-    } else {
-        // pos == number，无需移动，直接返回
-        return;
-    }*/
-    // 3. 放入正确位置
-    droneArray[pos] = bufferzone;
+    return true;
 }
 
 void registe(){
-   count++;
-   memoryexpand();
-   memoryflyapplyexpand();
+   ++count;
+   if(!memoryexpand()){
+        return;
+   }
    input(count-1);
-   //min_weight=sort(count-1); 
    insert_element(count-1);
    system("cls");
    printf("register success\n");
@@ -222,17 +143,16 @@ void list(){
 void applydisplay(int number){
     printf("applydronetype %s\n",applyArray[number].dronetype);  
     printf("applytime %s\n",applyArray[number].applytime);
-    if(!applyArray[number].passstatus){
+    if(applyArray[number].passstatus){
         printf("pass\n");
    }else{
        printf("Approval in progress\n");
    }
 }
 
-
 void apply(int number){
     printf("enter the dronetype you want to fly\n");
-     scanf("%19s",applyArray[number].dronetype);
+    scanf("%19s",applyArray[number].dronetype);
     printf("enter the apply address\n");
     scanf("%49s",applyArray[number].applyaddress);
     printf("enter the apply reson\n");
@@ -255,31 +175,37 @@ bool login(){
     printf("enter the password\n");
     scanf("%19s",password);
     for(int i=0;i<count;++i){
-        if(!strcmp(droneArray[i].name,name)&&!strcmp(droneArray[i].password,password)){
-            display(i);
-            printf("-------------------\n");
-            printf("applyhistory\n");
-            applydisplay(i);
-            printf("-------------------\n");
-            printf("apply for flying press 1\n");
-             int c=_getch()-'0';
-            switch (c){
-                case 1:
-                apply(i);
-                system("cls");
-                printf("please wait for approval\n");
-                system("pause");
-                break;
-                default :break;
+        if(!strcmp(droneArray[i].name,name)){
+            if(!strcmp(droneArray[i].password,password)){
+                display(i);
+                printf("-------------------\n");
+                printf("applyhistory\n");
+                applydisplay(i);
+                printf("-------------------\n");
+                printf("apply for flying press 1\n");
+                int c=_getch()-'0';
+                switch (c){
+                    case 1:
+                        apply(i);
+                        system("cls");
+                        printf("please wait for approval\n");
+                        system("pause");
+                        break;
+                    default:
+                        break;
+                }
+                return true;
             }
-           
-            //system("pause");
-            return 1;
+            else{
+                printf("Wrong password\n");
+                system("pause");
+                return false
+            }
         }
     }
-    printf("error user or password\n");
+    printf("User not found\n");
     system("pause");
-    return 0;
+    return false;
 }
 
 void menu(){
