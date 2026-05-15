@@ -1,6 +1,7 @@
+#ifndef DRONECONFIG_H
+#define DRONECONFIG_H
 #include<stdio.h>
 #include<stdbool.h>
-#include<string.h>
 #include<stdlib.h>
 #include<conio.h>
 #include<windows.h>
@@ -242,3 +243,4 @@ void menu(){
             exit(0);
     }
 }
+#endif
