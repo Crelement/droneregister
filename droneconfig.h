@@ -1,6 +1,7 @@
+#ifndef DRONECONFIG_H
+#define DRONECONFIG_H
 #include<stdio.h>
 #include<stdint.h>
-#include<string.h>
 #include<stdlib.h>
 #include<conio.h>
 #include<windows.h>
@@ -29,7 +30,7 @@ struct flyapply *applyArray;
 int capacity=10;
 int count=0;
 float min_weight=0;
- SYSTEMTIME st;
+SYSTEMTIME st;
 
 void input(int number){
     printf("please enter your name\n");
@@ -194,7 +195,7 @@ void insert_element(int number) {
     droneArray[pos] = bufferzone;
 }
 
-void registe(){   //command==2ä¸ºç™»ï¿?? command==1æ˜¯æ³¨ï¿??
+void registe(){   //command==2ä¸ºç™»ï¿?? command==1æ˜?æ³?ï¿??
    count++;
    memoryexpand();
    memoryflyapplyexpand();
@@ -306,3 +307,4 @@ void menu(){
             exit(0);
     }
 }
+#endif
